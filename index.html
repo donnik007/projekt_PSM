@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PSM-Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/vue@3"></script>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-storage.js"></script>
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- MAP -->
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.css"/>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+      /* Center align the page contents */
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      /* Style the form inputs */
+      input[type="text"], input[type="number"], textarea {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      /* Style the form submit button */
+      button[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      /* Style the item container */
+      #item-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      #author-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      /* Style the item card */
+      .card {
+        margin: 20px;
+        width: auto;
+      }
+
+      /* Style the item card header */
+      .card-header {
+        background-color: #4CAF50;
+        color: white;
+      }
+
+      .item {
+      margin: 20px;
+      border: 1px solid black;
+      width: 300px;
+      
+      }
+
+      /*Modals*/
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: #000000; /*Fallback Color*/
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-content {
+        border-radius: 7px;
+        background-color: #fefefe;
+        margin: 12% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .hidden {
+        display: none;
+      }
+      
+    </style>
+</head>
+<body>
+
+  <div id="firebaseui-auth-container" class="container-fluid" style="padding-top:70px"></div>
+  <div id="#logoutBtn" class="container-fluid" style="padding-top:70px"></div>
+          
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand">Employee Platform</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="#" data-target="#firebaseui-auth-container" onclick="hideNavbar()">Login</a>
+          </li>
+          <li class="nav-item active">
+            <button class="nav-link" id="logoutBtn" onclick="hideNavbar()">Logout</button>
+          </li>
+          <li class="nav-item active">
+            <a id ="myHome" class="nav-link" href="#" data-target="#home" onclick="hideNavbar()">Home</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#" data-target="#about" onclick="hideNavbar()">About</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#" data-target="#form" onclick="hideNavbar()">Form</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#" data-target="#wall" onclick="hideNavbar()">Wall</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <script>
+    function hideNavbar() {
+      var navbar = document.querySelector('.navbar-collapse');
+      navbar.classList.remove('show');
+    }
+  </script>
+
+  <div id="container" class="hidden">
+
+    <!-- FORM -->
+    <div id="form" class="container-fluid">
+      <h1 align="center">Form</h1>
+      <form id="item-form">
+        <div class="row mb-4">
+        <div class="col-sm-3">
+          <label for="name">Title:</label>
+          <input type="text" id="name" name="name" required>
+          
+        </div>
+        <div class="col-sm-3">
+          <label for="description">Simple Description:</label>
+          <input type="text" id="description" name="description" required>
+          
+        </div>
+        <div class="col-sm-3">
+          <br>
+          <label for="image">Image:</label>
+          <input type="file" id="image" name="image" required>
+          
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-sm-12">
+          <label for="keyWords">Key Words:</label>
+          <input type="text" id="keyWords" name="keyWords" required>
+          <small>Enter multiple keywords separated by commas (e.g. apple, banana, orange)</small>
+          
+        </div>
+        
+        
+      </div>
+      <div class="row mb-4">
+        <div class="col-sm-3">
+          
+          <button type="submit" onclick="vibrate()">Submit </button>
+        </div>
+      </div>
+        
+      
+    </form>
+    </div>
+    
+    <!-- HOME -->
+    <div id="home" class="container-fluid">
+      <h1 align="center">Home</h1>
+      <h1 align="center">Witaj {{ naviuser }}</h1>
+      <p>Internalowa (bądź w przyszłości produkcyjna) aplikacja, której główna funkcjonalność polega na dodawaniu wpisów poprzez formularz z miejscami/rzeczami/produktami (Formularz na opis, GPS odczytuje lokalizacje zdjęcia + możliwość zrobienia/dodania zdjęcia obiektu docelowego). Dodane za pomocą formularza wpisy będą publikowane na "Wallu". Potencjalna dodatkowa funkcjonalności dodanie użyteczności sztucznej inteligencji za pomocą API openAI do modelu GPT, która na podstawie słów kluczowych lub zdjęcia generuje opis obiektu. (potencjalne rozwiązanie niekoniecznie wprowadzone ze względu na ostatnie zmiany polityki OpenAI).</p>
+      <!-- HTML code for the map container -->
+      <div id="mapid" style="height: 400px;"></div>
+    </div>
+
+    <!-- ABOUT -->
+    <div id="about" class="container-fluid">
+      <h1 align="center">About</h1>
+      <div id="author-list"></div>
+    </div>
+
+    <!-- WALL -->
+    <div id="wall" class="container-fluid">
+      <!-- Container for displaying items -->
+      <h1 text-align="center">Wall</h1>
+      <button @click="count" type="button" style=" background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;">Click for post number: {{amount}}</button>
+      <div id="item-list"></div>
+    </div>
+    </div>
+  </div>
+  <!-- Vue-->
+  <script>
+    const wall = Vue.createApp({
+      data() {
+          
+          return {
+            amount: 0,
+        }
+    },
+    methods: {
+        count () {
+          var storageRef = storage.ref('items/');
+          var self=this;
+          storageRef.listAll().then(function(result) {
+            self.numit = result.items.length;
+            self.amount = self.numit;
+            return self.numit;
+          })
+        }
+    }
+    
+    }) .mount('#wall')
+
+
+    </script>
+
+    
+    <script>
+      function vibrate() {
+        navigator.vibrate(1000)
+      }
+      
+    </script>
+    <script>
+        // Initialize Firebase
+        var firebaseConfig = {
+          // TAJNE
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        
+        
+        firebase.auth().onAuthStateChanged(function(user) {
+          
+          if (user) {
+            var container = document.getElementById("container");
+            container.classList.remove("hidden");
+            console.log("User is signed in.");
+            
+            
+          } else {
+            // User is signed out.
+            console.log("User is signed out.");
+            var container = document.getElementById("container");
+            container.classList.add("hidden");
+            
+            
+          }
+        });
+
+        // Vue for display name
+        const home = Vue.createApp({
+          data() {
+            return {
+              naviuser: ''
+            }
+          },
+          mounted() {
+            firebase.auth().onAuthStateChanged((user) => {
+              if (user) {
+                this.naviuser = user.displayName;
+              } else {
+                this.naviuser = 'none';
+              }
+            });
+          }
+        }) .mount('#home')
+
+        // Get a reference to the Firestore database
+        var db = firebase.firestore();
+
+        // Get a reference to the Firebase Storage
+        var storage = firebase.storage();
+
+        // Get a reference to the item list
+        var itemList = document.getElementById('item-list');
+        var authorList = document.getElementById('author-list');
+
+        // Handle form submission
+        document.getElementById('item-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get the form data
+            var name = document.getElementById('name').value;
+            var description = document.getElementById('description').value;
+            var imageFile = document.getElementById('image').files[0];
+            var keyWords = document.getElementById('keyWords').value;
+            var authorname = firebase.auth().currentUser.displayName;
+            var timestamp = firebase.firestore.Timestamp.fromDate(new Date());
+
+          let open_ai_response;
+          async function openai_test(iddokumnetu) {
+            
+            var prompt_text = "Generate description of the image based on this key words using max 150 tokens: "
+            var prompt_text2 = keyWords
+            
+            var url = "https://api.openai.com/v1/completions";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("Authorization", "Bearer // TAJNE");
+
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4) {
+                  console.log(xhr.status);
+                  console.log(xhr.responseText);
+                  open_ai_response = xhr.responseText;
+                  console.log(open_ai_response);
+                  const response = JSON.parse(xhr.responseText);
+                  const text = response.choices[0].text;
+                  console.log(text);
+                  
+                  db.collection('gpt').add({
+                    keyWords: keyWords,
+                    gptResponse: text,
+                    iddokumnetu: iddokumnetu
+                  }).catch(function(error) {
+                      console.error('Error adding item:', error);
+                  })
+              }};
+              
+            var data = `{
+              "model": "text-davinci-003",
+              "prompt": "${prompt_text + prompt_text2}",
+              "temperature": 0.9,
+              "max_tokens": 150,
+              "top_p": 1,
+              "frequency_penalty": 0.0,
+              "presence_penalty": 0.6,
+              "stop": [" Human:", " AI:"]
+            }`;
+
+            xhr.send(data);
+            
+          }
+            navigator.geolocation.getCurrentPosition(position => { 
+              var latitude = position.coords.latitude;
+              var longitude = position.coords.longitude;
+            
+            // Create a new item document in Firestore
+            db.collection('items').add({
+                name: name,
+                description: description,
+                imageUrl: null,
+                latitude: latitude,
+                longitude: longitude,
+                authorname: authorname,
+                created_at: timestamp
+            }).then(function(docRef) {
+
+                openai_test(docRef.id);
+
+                // Upload the image file to Firebase Storage
+                var storageRef = storage.ref('items/' + docRef.id);
+                return storageRef.put(imageFile).then(function(snapshot) {
+                    // Get the download URL of the uploaded image
+                    return snapshot.ref.getDownloadURL();
+                }).then(function(downloadURL) {
+                    // Update the item document with the image URL
+                    return db.collection('items').doc(docRef.id).update({
+                        imageUrl: downloadURL
+                    });
+                });
+            }).catch(function(error) {
+                console.error('Error adding item:', error);
+            }).then(document.getElementById("item-form").reset());
+          });
+          
+        });
+
+        // Listen for changes to the items collection
+        db.collection('items').onSnapshot(function(querySnapshot) {
+            // Clear the item list
+            itemList.innerHTML = '';
+
+            // Loop through the items in the query snapshot
+            querySnapshot.forEach(function(doc) {
+                // Create a new item element
+                var item = document.createElement('div');
+                var options = {
+                  year: 'numeric',
+                  month: 'numeric',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  second: 'numeric'
+                };
+                var date1 = doc.data().created_at.toDate().toLocaleDateString('en-US', options);
+                
+                //GPT
+                
+                async function getDocumentByFieldValue(fieldName, fieldValue) {
+  try {
+    let querySnapshot = null;
+    const delayTime = 500; // Wait for 500 milliseconds between each query attempt
+    
+    while (querySnapshot == null || querySnapshot.empty) {
+      querySnapshot = await db.collection('gpt').where(fieldName, '==', fieldValue).get();
+      await new Promise(resolve => setTimeout(resolve, delayTime));
+    }
+    
+    const doc = querySnapshot.docs[0];
+    return doc.data().gptResponse;
+  } catch (error) {
+    console.error('Error getting document:', error);
+    throw error;
+  }
+}
+
+              var x;
+              // Call the function and handle the Promise with then
+              x = getDocumentByFieldValue('iddokumnetu', doc.id)
+                .then((result) => {
+                  
+                  item.className = "item"
+                item.innerHTML = '<h2>' + doc.data().name + '</h2>' + '<p>'+ doc.data().description +'</p>' +
+                                 '<img width="300"; height="300"; src="// TAJNE' + doc.id + '?alt=media"><p width: 300px;>GPT Description:'+ result +'</p><p>Author: '+ doc.data().authorname +'</p><p>Date: '+date1+'</p>';                                           
+                // Add the item element to the item list
+                itemList.appendChild(item);   
+                })
+                .catch((error) => {
+                  console.error('Error getting document:', error);
+                });
+                //END GPT        
+            });            
+        });
+
+        // Listen for changes to the Authors collection
+        db.collection('authors').onSnapshot(function(querySnapshot) {
+            // Clear the item list
+            authorList.innerHTML = '';
+
+            // Loop through the items in the query snapshot
+            querySnapshot.forEach(function(doc) {
+                // Create a new item element
+                var author = document.createElement('div');
+                author.className = "item"
+                author.innerHTML = '<h2>' + doc.data().Name +  " "  + doc.data().Surname + '</h2>' + '<br><h2>' + doc.data().ID+ '</h2>' + '<br><h2>' + doc.data().Age+ '</h2>';
+                // Add the item element to the item list
+                authorList.appendChild(author);                                
+            });            
+        });
+
+        // Initialize the map on the "mapid" div
+        var map = L.map('mapid').setView([50.020352, 19.8443008], 11);
+        // Add a tile layer to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+          maxZoom: 15,
+        }).addTo(map);
+        // Fetch the item documents from Firestore
+        db.collection('items').get().then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            // Get the latitude and longitude values from the document
+            var latitude = doc.data().latitude;
+            var longitude = doc.data().longitude;
+
+            // Add a marker to the map at the coordinates
+            marker = L.marker([latitude, longitude]).addTo(map);
+            marker.bindPopup(doc.data().name);
+          });
+        });
+
+    </script>
+      <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+      <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css"/>
+      <script>
+        // 1) Create a new firebaseui.auth instance stored to our local variable ui
+        const ui = new firebaseui.auth.AuthUI(firebase.auth())
+        // Define the CSS styles for the Firebase UI elements
+        
+        function goHome() {
+          const link = document.getElementById('myHome');
+          link.click();
+        }
+        // 2) These are our configurations.
+        const uiConfig = {
+          callbacks: {
+            signInSuccessWithAuthResult(authResult, redirectUrl) {
+              goHome();
+              return false
+            },
+            
+          },
+          signInFlow: "popup",
+          
+          signInOptions: [
+            firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            // Additional login options should be listed here
+            // once they are enabled within the console.
+          ]
+        }
+
+        // 3) Call the 'start' method on our ui class
+        // including our configuration options.
+        ui.start("#firebaseui-auth-container", uiConfig)
+
+        const logoutBtn = document.querySelector("#logoutBtn");
+
+        logoutBtn.addEventListener("click", () => {
+          firebase.auth().signOut().then(() => {
+            // Sign-out successful.
+            console.log("User logged out successfully.");
+          }).catch((error) => {
+            // An error happened.
+            console.log(error);
+          });
+        });
+      </script>
+
+     <!-- JavaScript Code to Show/Hide Content Sections -->
+    <script>
+      $(document).ready(function(){
+        // Show the login section by default
+        $("#firebaseui-auth-container").show();
+        $("#about").hide();
+        $("#form").hide();
+        $("#wall").hide();
+        $("#home").hide();
+
+        // Add a click event to each navigation link
+        $(".nav-link").click(function(){
+          // Hide all content sections
+          $("#home").hide();
+          $("#about").hide();
+          $("#form").hide();
+          $("#wall").hide();
+          $("#firebaseui-auth-container").hide();
+          
+          // Show the selected content section
+          $($(this).data("target")).show();
+        });
+      });
+    </script>
+<script>
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register (
+      '/sw.js',
+      {scope: '/'}
+    )
+  }
+</script>
+</body>
+</html

@@ -1,0 +1,17 @@
+{
+  "name": "Proejkt Programowanie Systemów Mobilnych",
+  "short_name": "project_PSM",
+  "description": "Proejkt Programowanie Systemów Mobilnych",
+  "scope": "/",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone", 
+  "icons": [
+      {
+        "src": "/img/icon.png",
+        "type": "image/png",
+        "sizes": "600x600"
+      }
+  ]
+}
